@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autoevaluación – Distribución de Poisson</title>
+<meta name="description" content="EVA interactivo de autoevaluación sobre Distribución de Poisson">
+<style>
+:root{
+  --bg:#eef8ff;--panel:#ffffff;--blue:#0d5f9a;--blue2:#167fc1;--sky:#dff4ff;
+  --ink:#102a43;--muted:#5d7285;--line:#cfe6f3;--ok:#168a52;--okbg:#e8f8ef;
+  --bad:#c7364f;--badbg:#fff0f3;--shadow:0 14px 40px rgba(18,81,120,.12);
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);
+background:radial-gradient(circle at 15% 0%,rgba(58,169,232,.18),transparent 24%),linear-gradient(180deg,#f6fbff 0%,var(--bg) 100%);line-height:1.55}
+button,input{font:inherit}.wrap{width:min(1120px,calc(100% - 28px));margin:auto}
+.hero{margin:18px auto 28px;padding:34px clamp(22px,5vw,54px);border-radius:26px;color:white;
+background:linear-gradient(135deg,rgba(5,77,126,.96),rgba(11,111,172,.96));box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:330px;height:330px;border-radius:50%;right:-120px;top:-145px;border:1px dashed rgba(255,255,255,.35)}
+.kicker{display:inline-flex;gap:8px;align-items:center;padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.13);font-weight:800;font-size:.78rem;letter-spacing:.06em}
+h1{font-size:clamp(2.2rem,6vw,4.7rem);line-height:1.02;letter-spacing:-.04em;margin:18px 0 16px}
+.hero p{max-width:780px;color:#eaf7ff;font-size:1.04rem}.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:30px;align-items:center}
+.hero-graphic{min-height:260px;position:relative;display:grid;place-items:center}.lambda{width:190px;height:190px;border-radius:50%;display:grid;place-items:center;
+background:linear-gradient(145deg,#ecfbff,#a9dfff);color:#0d5f9a;font-family:Georgia,serif;font-size:8rem;box-shadow:0 22px 70px rgba(0,0,0,.15)}
+.barset{position:absolute;right:12px;bottom:16px;width:180px;height:120px;display:flex;align-items:flex-end;gap:8px;padding:18px;border-radius:18px;background:rgba(255,255,255,.12)}
+.barset i{display:block;flex:1;background:#aee8ff;border-radius:6px 6px 0 0}.barset i:nth-child(1){height:26%}.barset i:nth-child(2){height:46%}.barset i:nth-child(3){height:72%}.barset i:nth-child(4){height:95%}.barset i:nth-child(5){height:70%}.barset i:nth-child(6){height:38%}
+.info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:24px 0}.info-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+.info-card b{display:block;color:var(--blue);font-size:.82rem;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}.info-card strong{font-size:1.05rem}.info-card code{display:block;margin-top:7px;color:var(--ink);font-size:.95rem}
+.section{margin:34px auto}.section-title{margin-bottom:18px}.section-title span{color:var(--blue2);font-weight:800;font-size:.78rem;letter-spacing:.08em}
+.section-title h2{font-size:clamp(1.7rem,4vw,2.6rem);margin:5px 0 8px;letter-spacing:-.03em}.section-title p{margin:0;color:var(--muted);max-width:760px}
+.quiz-shell{background:var(--panel);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);overflow:hidden}
+.quiz-top{padding:20px 22px;border-bottom:1px solid var(--line);background:#fbfdff}.quiz-meta{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}
+.progress-track{height:10px;background:#e9f4fa;border-radius:999px;overflow:hidden;margin-top:14px}.progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--blue2),#54c7f3);transition:width .3s ease}
+.quiz-body{padding:26px}.q-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:var(--sky);color:var(--blue);font-size:.78rem;font-weight:800}
+.question-title{font-size:clamp(1.25rem,3vw,1.7rem);margin:14px 0 18px}.answers{display:grid;gap:11px}
+.answer-btn{width:100%;text-align:left;border:1px solid var(--line);background:white;color:var(--ink);padding:14px 16px;border-radius:14px;cursor:pointer;transition:.15s ease}
+.answer-btn:hover:not(:disabled){transform:translateY(-1px);border-color:#8ccce9;background:#f7fcff}.answer-btn.correct{border-color:#75c69a;background:var(--okbg)}.answer-btn.wrong{border-color:#ef9eae;background:var(--badbg)}
+.numeric-row{display:flex;gap:10px;flex-wrap:wrap}.numeric-row input{min-width:220px;flex:1;border:1px solid var(--line);border-radius:13px;padding:13px 14px;color:var(--ink)}
+.btn{border:0;border-radius:13px;padding:12px 17px;font-weight:800;cursor:pointer;background:var(--blue2);color:white;box-shadow:0 8px 20px rgba(22,127,193,.2)}
+.btn.secondary{background:#eaf6fc;color:var(--blue);box-shadow:none;border:1px solid var(--line)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.feedback{display:none;margin-top:18px;padding:14px 16px;border-radius:14px;border:1px solid}.feedback.show{display:block}.feedback.ok{background:var(--okbg);border-color:#94d4af;color:#0b6d3f}.feedback.bad{background:var(--badbg);border-color:#efb0bd;color:#9c263d}
+.quiz-nav{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}.results{display:none;padding:28px}.results.show{display:block}
+.score-circle{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;margin:0 auto 18px;background:conic-gradient(var(--blue2) 0deg,#eaf4fa 0deg);position:relative}
+.score-circle:before{content:"";position:absolute;inset:13px;border-radius:50%;background:white}.score-circle span{position:relative;font-size:2rem;font-weight:900;color:var(--blue)}.result-center{text-align:center}
+.review-box{margin-top:20px;padding:18px;border-radius:16px;background:#f7fbfe;border:1px solid var(--line)}.review-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.review-tag{padding:7px 10px;border-radius:999px;background:#fff3d9;color:#885b00;font-weight:700;font-size:.86rem}
+.decision{background:var(--panel);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:24px}.step-card{display:none;padding:20px;border-radius:18px;background:#f8fcff;border:1px solid var(--line)}.step-card.active{display:block}
+.step-num{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--blue2);color:white;font-weight:900;margin-bottom:10px}.step-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.yes{background:var(--ok)}.no{background:var(--bad)}.decision-result{display:none;margin-top:18px;padding:18px;border-radius:16px;border:1px solid}.decision-result.show{display:block}.decision-result.good{background:var(--okbg);border-color:#99d7b4;color:#0b6d3f}.decision-result.stop{background:var(--badbg);border-color:#efb0bd;color:#9c263d}
+.formula-panel{margin-top:24px;padding:22px;border-radius:22px;background:linear-gradient(135deg,#e8f7ff,#f8fcff);border:1px solid var(--line)}.formula-big{text-align:center;font-family:Georgia,serif;font-size:clamp(1.7rem,5vw,3rem);margin:14px 0;color:#0c4169}
+.footer-note{margin:38px auto 26px;text-align:center;color:var(--muted);font-size:.9rem}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr}.hero-graphic{min-height:220px}.info-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.info-grid{grid-template-columns:1fr}.hero{padding:26px 20px}.quiz-body,.results{padding:20px}.lambda{width:150px;height:150px;font-size:6rem}.barset{width:145px;height:98px}}
+</style>
+</head>
+<body>
+<header class="hero wrap">
+  <div class="hero-grid">
+    <div>
+      <span class="kicker">📊 EVA · Probabilidad</span>
+      <h1>Autoevaluación – Distribución de Poisson</h1>
+      <p>La distribución de Poisson se utiliza para modelar la cantidad de veces que ocurre un evento en un intervalo de tiempo, espacio o región determinada. En este EVA vas a responder una serie de preguntas y recibir retroalimentación inmediata.</p>
+    </div>
+    <div class="hero-graphic" aria-hidden="true">
+      <div class="lambda">λ</div>
+      <div class="barset"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="info-grid">
+    <article class="info-card"><b>Tipo</b><strong>Distribución discreta</strong><code>X = 0,1,2,3,…</code></article>
+    <article class="info-card"><b>Parámetro</b><strong>λ = promedio de ocurrencias</strong><code>por unidad de tiempo o espacio</code></article>
+    <article class="info-card"><b>Esperanza y varianza</b><strong>E(X)=λ · V(X)=λ</strong><code>σ = √λ</code></article>
+    <article class="info-card"><b>Aproximación</b><strong>Binomial → Poisson</strong><code>λ=np, si n grande y p pequeña</code></article>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
+      <span>FASE 3 · AUTOEVALUACIÓN</span>
+      <h2>Comprobá lo que entendiste</h2>
+      <p>Respondé una pregunta por vez. No se muestran las respuestas correctas hasta que contestes.</p>
+    </div>
+
+    <div class="quiz-shell">
+      <div class="quiz-top">
+        <div class="quiz-meta"><strong id="progressText">Pregunta 1 de 8</strong><span id="liveScore">Aciertos: 0</span></div>
+        <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+      </div>
+
+      <div id="quizBody" class="quiz-body">
+        <span id="qBadge" class="q-badge">Concepto</span>
+        <h3 id="questionTitle" class="question-title"></h3>
+        <div id="answers" class="answers"></div>
+        <div id="feedback" class="feedback"></div>
+        <div class="quiz-nav"><button id="nextBtn" class="btn" disabled>Siguiente</button></div>
+      </div>
+
+      <div id="results" class="results">
+        <div class="result-center">
+          <div id="scoreCircle" class="score-circle"><span id="scorePct">0%</span></div>
+          <h3 id="resultTitle"></h3>
+          <p id="resultText"></p>
+        </div>
+        <div class="review-box">
+          <strong>Temas para revisar</strong>
+          <div id="reviewTags" class="review-tags"></div>
+        </div>
+        <div class="quiz-nav"><button id="retryBtn" class="btn">Volver a intentar</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
+      <span>DECISIÓN GUIADA</span>
+      <h2>¿Cuándo usar Poisson?</h2>
+      <p>Respondé las preguntas del algoritmo. Si alguna condición no se cumple, conviene revisar otro modelo.</p>
+    </div>
+    <div class="decision">
+      <div id="step1" class="step-card active">
+        <div class="step-num">1</div><h3>¿Se cuenta una cantidad de ocurrencias?</h3><p>Ejemplo: llamadas por hora, pacientes por día, fallas por semana.</p>
+        <div class="step-actions"><button class="btn yes" data-decision="yes" data-step="1">Sí</button><button class="btn no" data-decision="no" data-step="1">No</button></div>
+      </div>
+      <div id="step2" class="step-card">
+        <div class="step-num">2</div><h3>¿Las ocurrencias se observan en un intervalo de tiempo, espacio o región?</h3>
+        <div class="step-actions"><button class="btn yes" data-decision="yes" data-step="2">Sí</button><button class="btn no" data-decision="no" data-step="2">No</button></div>
+      </div>
+      <div id="step3" class="step-card">
+        <div class="step-num">3</div><h3>¿Existe una tasa promedio aproximadamente constante (λ)?</h3>
+        <div class="step-actions"><button class="btn yes" data-decision="yes" data-step="3">Sí</button><button class="btn no" data-decision="no" data-step="3">No</button></div>
+      </div>
+      <div id="step4" class="step-card">
+        <div class="step-num">4</div><h3>¿Las ocurrencias pueden considerarse aproximadamente independientes?</h3>
+        <div class="step-actions"><button class="btn yes" data-decision="yes" data-step="4">Sí</button><button class="btn no" data-decision="no" data-step="4">No</button></div>
+      </div>
+      <div id="decisionResult" class="decision-result"></div>
+      <div class="quiz-nav"><button id="resetDecision" class="btn secondary">Reiniciar algoritmo</button></div>
+    </div>
+  </section>
+
+  <section class="section formula-panel">
+    <div class="section-title"><span>RECORDATORIO</span><h2>Función de probabilidad</h2></div>
+    <div class="formula-big">P(X=x)=e<sup>−λ</sup> λ<sup>x</sup> / x!</div>
+    <p style="text-align:center;color:var(--muted)">con x = 0,1,2,… y λ &gt; 0</p>
+  </section>
+</main>
+
+<footer class="footer-note wrap">EVA interactivo · Distribución de Poisson · Probabilidad</footer>
+
+<script>
+const questions=[
+{type:"choice",tag:"Concepto",topic:"Concepto y tipo de variable",text:"¿Qué modela principalmente una distribución de Poisson?",options:["La cantidad de veces que ocurre un evento en un intervalo.","La proporción de éxitos en una muestra.","El tiempo exacto hasta que ocurre un evento.","Una variable continua entre 0 y 1."],correct:0,explain:"Poisson modela conteos de ocurrencias en un intervalo de tiempo, espacio o región. Por eso la variable es discreta."},
+{type:"tf",tag:"Verdadero / Falso",topic:"Dominio de la variable",text:"En una distribución de Poisson, la variable aleatoria puede tomar valores 0, 1, 2, 3, …",options:["Verdadero","Falso"],correct:0,explain:"La variable de Poisson es discreta y representa un conteo, por eso toma enteros no negativos."},
+{type:"choice",tag:"Parámetro λ",topic:"Interpretación de λ",text:"Si X ~ Poisson(4), ¿qué significa λ = 4?",options:["Que siempre ocurren exactamente 4 eventos.","Que el promedio de ocurrencias por intervalo es 4.","Que la varianza es 2.","Que la probabilidad máxima es 4."],correct:1,explain:"λ representa la tasa o número promedio de ocurrencias por unidad de tiempo o espacio."},
+{type:"choice",tag:"Esperanza y varianza",topic:"Esperanza, varianza y desvío",text:"Si X ~ Poisson(9), ¿cuáles son E(X), V(X) y σ?",options:["E(X)=9, V(X)=9 y σ=3.","E(X)=9, V(X)=3 y σ=9.","E(X)=3, V(X)=9 y σ=3.","E(X)=9, V(X)=81 y σ=9."],correct:0,explain:"En Poisson, E(X)=λ y V(X)=λ. El desvío estándar es σ=√λ. Para λ=9, σ=3."},
+{type:"choice",tag:"¿Corresponde Poisson?",topic:"Condiciones de aplicación",text:"¿Cuál de estas situaciones es la más adecuada para modelar con Poisson?",options:["Altura de estudiantes de una universidad.","Cantidad de llamadas que recibe una central por minuto.","Porcentaje de alumnos aprobados.","Temperatura máxima diaria."],correct:1,explain:"Las llamadas son un conteo de ocurrencias en un intervalo de tiempo, un contexto típico para Poisson."},
+{type:"choice",tag:"Función de probabilidad",topic:"Función de probabilidad",text:"¿Cuál es la función de probabilidad de una variable X con distribución de Poisson?",options:["P(X=x)=e^(−λ)·λ^x/x!","P(X=x)=λ/x","P(X=x)=x/λ","P(X=x)=1−e^(−λx)"],correct:0,explain:"La función de probabilidad de Poisson es P(X=x)=e^(−λ)·λ^x/x!, para x=0,1,2,…"},
+{type:"choice",tag:"Aproximación binomial",topic:"Relación con la binomial",text:"¿Cuándo puede usarse Poisson como aproximación de una distribución binomial?",options:["Cuando n es pequeño y p es grande.","Cuando n es grande y p es pequeña, usando λ=np.","Siempre, sin importar n ni p.","Solo cuando p=0,5."],correct:1,explain:"Poisson puede aproximar a la binomial cuando n es grande y p pequeña. En ese caso se usa λ=np."},
+{type:"numeric",tag:"Aplicación",topic:"Cálculo con la función de probabilidad",text:"Una central recibe en promedio 3 llamadas por minuto. Si X ~ Poisson(3), calculá aproximadamente P(X=2). Ingresá un valor decimal con 3 o 4 cifras.",answer:0.2240,tolerance:0.003,explain:"P(X=2)=e^(−3)·3²/2! ≈ 0,2240. Es decir, aproximadamente 22,4%."}
+];
+
+let current=0,score=0,answered=false,wrongTopics=[];
+const progressText=document.getElementById("progressText"),progressFill=document.getElementById("progressFill"),liveScore=document.getElementById("liveScore"),qBadge=document.getElementById("qBadge"),questionTitle=document.getElementById("questionTitle"),answers=document.getElementById("answers"),feedback=document.getElementById("feedback"),nextBtn=document.getElementById("nextBtn"),quizBody=document.getElementById("quizBody"),results=document.getElementById("results");
+
+function renderQuestion(){
+  answered=false;nextBtn.disabled=true;feedback.className="feedback";feedback.innerHTML="";
+  const q=questions[current];
+  progressText.textContent=`Pregunta ${current+1} de ${questions.length}`;
+  progressFill.style.width=`${(current/questions.length)*100}%`;
+  liveScore.textContent=`Aciertos: ${score}`;qBadge.textContent=q.tag;questionTitle.textContent=q.text;answers.innerHTML="";
+  if(q.type==="numeric"){
+    answers.innerHTML='<div class="numeric-row"><input id="numericInput" inputmode="decimal" placeholder="Ej.: 0,2240"><button class="btn" id="checkNumeric">Comprobar</button></div>';
+    document.getElementById("checkNumeric").addEventListener("click",checkNumeric);
+  }else{
+    q.options.forEach((opt,idx)=>{
+      const b=document.createElement("button");b.type="button";b.className="answer-btn";b.textContent=opt;
+      b.addEventListener("click",()=>checkChoice(idx,b));answers.appendChild(b);
+    });
+  }
+  nextBtn.textContent=current===questions.length-1?"Ver resultado":"Siguiente";
+}
+function showFeedback(ok,explanation){
+  feedback.className=`feedback show ${ok?"ok":"bad"}`;
+  feedback.innerHTML=`<strong>${ok?"Correcto":"Revisar"}</strong><br>${explanation}`;
+  nextBtn.disabled=false;
+}
+function checkChoice(idx,btn){
+  if(answered)return;answered=true;const q=questions[current];
+  document.querySelectorAll(".answer-btn").forEach(b=>b.disabled=true);
+  const ok=idx===q.correct;
+  if(ok){score++;btn.classList.add("correct")}else{btn.classList.add("wrong");wrongTopics.push(q.topic)}
+  liveScore.textContent=`Aciertos: ${score}`;showFeedback(ok,q.explain);
+}
+function checkNumeric(){
+  if(answered)return;const q=questions[current],input=document.getElementById("numericInput"),val=Number(input.value.trim().replace(",","."));
+  if(!Number.isFinite(val)){feedback.className="feedback show bad";feedback.innerHTML="<strong>Revisar</strong><br>Ingresá un número decimal válido.";return}
+  answered=true;document.getElementById("checkNumeric").disabled=true;input.disabled=true;
+  const ok=Math.abs(val-q.answer)<=q.tolerance;
+  if(ok){score++;input.style.background="#e8f8ef"}else{wrongTopics.push(q.topic);input.style.background="#fff0f3"}
+  liveScore.textContent=`Aciertos: ${score}`;showFeedback(ok,q.explain);
+}
+nextBtn.addEventListener("click",()=>{if(!answered)return;if(current<questions.length-1){current++;renderQuestion()}else{showResults()}});
+function showResults(){
+  quizBody.style.display="none";results.classList.add("show");progressText.textContent=`Completado: ${questions.length} de ${questions.length}`;progressFill.style.width="100%";
+  const pct=Math.round(score/questions.length*100);document.getElementById("scorePct").textContent=pct+"%";document.getElementById("scoreCircle").style.background=`conic-gradient(var(--blue2) ${pct*3.6}deg,#eaf4fa 0deg)`;
+  let title,msg;if(pct>=88){title="Muy buen dominio de Poisson";msg=`Obtuviste ${score} respuestas correctas de ${questions.length}. Podés avanzar con ejercicios de mayor complejidad.`}
+  else if(pct>=63){title="Buen trabajo, con algunos puntos para reforzar";msg=`Obtuviste ${score} respuestas correctas de ${questions.length}. Revisá los temas señalados antes de continuar.`}
+  else{title="Conviene repasar antes de avanzar";msg=`Obtuviste ${score} respuestas correctas de ${questions.length}. Volvé a los conceptos básicos y después reintentá la actividad.`}
+  document.getElementById("resultTitle").textContent=title;document.getElementById("resultText").textContent=msg;
+  const tags=document.getElementById("reviewTags");tags.innerHTML="";const unique=[...new Set(wrongTopics)];
+  if(unique.length===0){const s=document.createElement("span");s.className="review-tag";s.style.background="#e8f8ef";s.style.color="#0b6d3f";s.textContent="No hay temas pendientes";tags.appendChild(s)}
+  else unique.forEach(t=>{const s=document.createElement("span");s.className="review-tag";s.textContent=t;tags.appendChild(s)});
+}
+document.getElementById("retryBtn").addEventListener("click",()=>{current=0;score=0;answered=false;wrongTopics=[];results.classList.remove("show");quizBody.style.display="block";renderQuestion();window.scrollTo({top:document.querySelector(".quiz-shell").offsetTop-20,behavior:"smooth"})});
+renderQuestion();
+
+const decisionResult=document.getElementById("decisionResult");
+document.querySelectorAll("[data-decision]").forEach(btn=>btn.addEventListener("click",()=>{
+  const step=Number(btn.dataset.step),yes=btn.dataset.decision==="yes";
+  if(!yes){
+    document.querySelectorAll(".step-card").forEach(s=>s.classList.remove("active"));decisionResult.className="decision-result show stop";
+    const reasons={1:"No se está contando una cantidad de ocurrencias. Conviene revisar otro tipo de variable o distribución.",2:"No hay un intervalo de tiempo, espacio o región claramente definido. Poisson probablemente no sea el modelo adecuado.",3:"No hay una tasa promedio aproximadamente constante. Conviene revisar otro modelo.",4:"Las ocurrencias no pueden considerarse aproximadamente independientes. Poisson puede no ser adecuado."};
+    decisionResult.innerHTML=`<strong>Revisar otro modelo</strong><br>${reasons[step]}`;return;
+  }
+  document.getElementById("step"+step).classList.remove("active");
+  if(step<4)document.getElementById("step"+(step+1)).classList.add("active");
+  else{decisionResult.className="decision-result show good";decisionResult.innerHTML="<strong>La distribución de Poisson puede ser adecuada para modelar esta situación.</strong><br>Se cumplen las condiciones básicas del algoritmo de decisión."}
+}));
+document.getElementById("resetDecision").addEventListener("click",()=>{document.querySelectorAll(".step-card").forEach(s=>s.classList.remove("active"));document.getElementById("step1").classList.add("active");decisionResult.className="decision-result";decisionResult.innerHTML=""});
+</script>
+</body>
+</html>
